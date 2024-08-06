@@ -1,30 +1,39 @@
 #!/usr/bin/env python3
 """
-This module contains a function that concurrently runs multiple async tasks.
+Module for task 1 - Concurrent Coroutines
 """
-
-import asyncio
+from asyncio import gather
 from typing import List
-from 0_basic_async_syntax import wait_random
+from random import uniform
+from time import sleep
 
-
-async def wait_n(n: int, max_delay: int) -> List[float]:
+async def wait_random(max_delay: int) -> float:
     """
-    Run wait_random n times with the specified max_delay and return the list of delays.
+    Asynchronously wait for a random delay and return it.
 
     Args:
-        n (int): The number of times to spawn wait_random.
-        max_delay (int): The maximum delay for wait_random.
+        max_delay (int): Maximum delay time in seconds.
 
     Returns:
-        List[float]: A list of all delays in ascending order.
+        float: The actual delay time.
     """
-    delays = []
-    for _ in range(n):
-        delays.append(asyncio.create_task(wait_random(max_delay)))
+    delay = uniform(0, max_delay)
+    sleep(delay)
+    return delay
 
-    completed_delays = []
-    for delay in asyncio.as_completed(delays):
-        completed_delays.append(await delay)
+async def wait_n(num_times: int, max_delay: int) -> List[float]:
+    """
+    Spawn wait_random num_times times with the specified max_delay.
 
-    return completed_delays
+    Args:
+        num_times (int): Number of times to spawn wait_random.
+        max_delay (int): Maximum delay time in seconds.
+
+    Returns:
+        List[float]: List of all the delays (float values) sorted.
+    """
+    return sorted(
+        await gather(
+            *[wait_random(max_delay) for _ in range(num_times)]
+        )
+    )
